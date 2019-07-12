@@ -6,6 +6,37 @@ image:https://codecov.io/gh/codeready-toolchain/toolchain-common/branch/master/g
 
 This repo is for controllers, libs, scripts, make files, etc to be shared between host and member operators.
 
+== Setting Up Host and Member Operators
+
+In a new terminal, navigate to codeready-toolchain/host-operator directory and execute the following commands
+```
+$ minishift start --profile toolchain
+$ make up-local
+^C
+```
+In the same terminal, navigate to codeready-toolchain/member-operator directory and execute the following commands
+```
+$ make up-local
+^C
+$ make add-member-to-host
+```
+In the same terminal, navigate back to codeready-toolchain/host-operator directory and execute the following commands
+```
+make add-host-to-member
+```
+In the same terminal, navigate back to codeready-toolchain/member-operator directory and execute the following commands
+```
+$ make up-local
+```
+
+Now that we are setup, we can add resources and watch the logs on the member-operator! To do so, open a new terminal and run the following commands
+```
+$ oc project toolchain-host-operator
+$ oc apply -f '/path/to/masteruserreord.yaml'
+$ oc project toolchain-member-operator
+$ oc apply -f '/path/to/useraccount.yaml'
+```
+
 == Configuring developers.redhat.com Authentication in OpenShift 4 Cluster
 
 Create a secret with Identity Provider credentials:
