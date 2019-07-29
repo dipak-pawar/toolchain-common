@@ -3,7 +3,7 @@ groups: null
 identities: null
 kind: User
 metadata:
-  name: ${USERNAME}
+  name: ${USER_NAME}
 ---
 apiVersion: user.openshift.io/v1
 kind: Identity
@@ -17,6 +17,6 @@ kind: UserIdentityMapping
 metadata:
   name: rhd:${USER_ID_FROM_SUB_CLAIM}
 user:
-  name: ${USERNAME}
+  name: ${USER_NAME}
 identity:
   name: rhd:${USER_ID_FROM_SUB_CLAIM}
