@@ -8,7 +8,7 @@ spec:
     mappingMethod: lookup
     type: OpenID
     openID:
-      clientID: toolchain
+      clientID: crtoolchain
       clientSecret:
         name: rhd-idp-secret
       claims:
@@ -18,4 +18,4 @@ spec:
         - name
         email:
         - email
-      issuer: https://sso.prod-preview.openshift.io/auth/realms/toolchain-dev
+      issuer: https://developers.redhat.com/auth/realms/rhd
