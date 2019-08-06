@@ -125,7 +125,7 @@ Make sure that you have started minishift as different profiles. You can use fol
 Once you have minishift running with above profiles, you can `./add-clusters.sh` script with required flags.
 
 Assumption: This script assumes that you have host and member operators running on host and member clusters(in our case clusters are different profiles)
-in respective namespace with all requires resources like Service Account, {Cluster}Role, {Cluste}RoleBinding, Custom Resource Definition.
+in respective namespace with all requires resources like Service Account, (Cluster)Role, (Cluste)RoleBinding, Custom Resource Definition.
 
 *Scenario 1: Add Member to Host*
 
