@@ -99,7 +99,7 @@ KUBEFEDCLUSTER_CRD="apiVersion: core.kubefed.k8s.io/v1beta1
 kind: KubeFedCluster
 metadata:
   name: ${JOINING_CLUSTER_TYPE}-${JOINING_CLUSTER_NAME}
-  namespace: ${OPERATOR_NS}
+  namespace: ${CLUSTER_JOIN_TO_OPERATOR_NS}
   labels:
     type: ${JOINING_CLUSTER_TYPE}
     namespace: ${OPERATOR_NS}
