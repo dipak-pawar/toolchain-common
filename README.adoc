@@ -179,12 +179,12 @@ Make sure that you have started minishift. You can use following commands for it
 
 Once you have minishift or any openshift cluster running and logged in as admin, you can run `./scripts/add-clusters.sh` script with required flags.
 
-Assumption: This script assumes that you have host and member operators running on minishift or any other openshift cluster
-in respective namespace with all requires resources like Service Account, {Cluster}Role, {Cluste}RoleBinding, Custom Resource Definition.
+Assumption: This script assumes that you have host and member operators running on minishift or any other Openshift cluster
+in respective namespace with all requires resources like Service Account, (Cluster)Role, (Cluster)RoleBinding, Custom Resource Definition.
 *Scenario 1: Add Member to Host*
 
 ```bash
-./scripts/add-cluster.sh -t member -p false
+./scripts/add-cluster.sh -t member -s
 ```
 
 **Steps included:**
@@ -197,7 +197,7 @@ in respective namespace with all requires resources like Service Account, {Clust
 
 *Scenario 2: Add Host to Member*
 ```bash
-./scripts/add-cluster.sh -t host
+./scripts/add-cluster.sh -t host -s
 ```
 
 **Steps included:**
@@ -215,3 +215,5 @@ If you are running `member-operator` and `host-operator` in different namespaces
 ```bash
 ./scripts/add-cluster.sh --type host --member-ns member-operator-0xdf4 --host-ns host-operator-hj6d7 --profile false
 ```
+
+While overwriting default namespaces, please do remember to provide member and host namespace. If you are trying to overwrite with single namespace, it's not supported at this point.

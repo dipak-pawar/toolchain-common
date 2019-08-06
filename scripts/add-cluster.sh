@@ -6,7 +6,7 @@ user_help () {
     echo "-t, --type            joining cluster type (host or member)"
     echo "-mn, --member-ns      namespace where member-operator is running"
     echo "-hn, --host-ns        namespace where host-operator is running"
-    echo "-p,  --profile        true if using minishift profiles, by default true"
+    echo "-s,  --single-cluster running both operators on single cluster"
     exit 0
 }
 
@@ -35,9 +35,9 @@ while test $# -gt 0; do
                 HOST_OPERATOR_NS=$1
                 shift
                 ;;
-            -p|--profile)
+            -s|--single-cluster)
                 shift
-                PROFILE=$1
+                SINGLE_CLUSTER=true
                 shift
                 ;;
             *)
@@ -67,11 +67,11 @@ fi
 
 SA_NAME=${JOINING_CLUSTER_TYPE}"-operator"
 
-echo $OPERATOR_NS
-echo $CLUSTER_JOIN_TO_OPERATOR_NS
+echo ${OPERATOR_NS}
+echo ${CLUSTER_JOIN_TO_OPERATOR_NS}
 
 # This is to work with multiple profiles of minishift. By default profile is true
-if [[ ${PROFILE} != "false" ]]; then
+if [[ ${SINGLE_CLUSTER} != "true" ]]; then
   echo "Switching to profile ${JOINING_CLUSTER_TYPE}"
   minishift profile set ${JOINING_CLUSTER_TYPE}
   oc login -u=system:admin
@@ -86,7 +86,7 @@ API_ENDPOINT=`oc config view --raw --minify -o json | jq -r '.clusters[0].cluste
 JOINING_CLUSTER_NAME=`oc config view --raw --minify -o json | jq -r '.clusters[0].name' | sed 's/[^[:alnum:]._-]/-/g'`
 
 # This is to work with multiple profiles of minishift. By default profile is true
-if [[ ${PROFILE} != "false" ]]; then
+if [[ ${SINGLE_CLUSTER} != "true" ]]; then
   echo "Switching to profile ${CLUSTER_JOIN_TO}"
   minishift profile set ${CLUSTER_JOIN_TO}
   oc login -u=system:admin
