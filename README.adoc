@@ -172,7 +172,7 @@ make add-host-to-member
 
 Note: We have make target available for this i.e. `make add-host-to-member` member-operator, host-operator repository
 
-==== Using minishift without profiles or any single openshift cluster as host and member clusters
+==== Using a single cluster for both operators host and member
 Make sure that you have started minishift. You can use following commands for it.
 
 * `minishift start`
