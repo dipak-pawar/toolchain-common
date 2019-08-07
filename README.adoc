@@ -114,7 +114,7 @@ $ oc apply -f deploy/user.yaml
 === add-cluster.sh
 
 The CodeReady Toolchain architecture contains two types of clusters `host` and `member`.
-To connect these two clusters together it is necessary to run a script link:scripts/add-cluster.sh[] that takes multiple flags like, `--type`, `--member-ns`, `--host-ns`, `--profile`. However you can see all these options by using `./scripts/add-cluster.sh -h`
+To connect these two clusters together it is necessary to run a script link:scripts/add-cluster.sh[] that takes multiple flags like, `--type`, `--member-ns`, `--host-ns`, `--single-cluster`. However you can see all these options by using `./scripts/add-cluster.sh -h`
 
 ==== host and member clusters using host and member profiles on minishift
 Make sure that you have started minishift as different profiles. You can use following commands for it.
@@ -213,7 +213,7 @@ in respective namespace with all requires resources like Service Account, (Clust
 If you are running `member-operator` and `host-operator` in different namespaces other than default (i.e. not in `toolchain-member-operator` or `toolchain-host-operator`), you can do it passing `-mn or -hs` flags
 
 ```bash
-./scripts/add-cluster.sh --type host --member-ns member-operator-0xdf4 --host-ns host-operator-hj6d7 --profile false
+./scripts/add-cluster.sh --type host --member-ns member-operator-0xdf4 --host-ns host-operator-hj6d7 --single-cluster
 ```
 
 While overwriting default namespaces, please do remember to provide member and host namespace. If you are trying to overwrite with single namespace, it's not supported at this point.
