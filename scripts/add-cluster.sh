@@ -82,7 +82,7 @@ SA_TOKEN=`oc get secret ${SA_SECRET} -n ${OPERATOR_NS}  -o json | jq -r '.data["
 SA_CA_CRT=`oc get secret ${SA_SECRET} -n ${OPERATOR_NS} -o json | jq -r '.data["ca.crt"]'`
 
 # this env variable is set in openshift-ci environment.
-# openshift ci has long name for cluster i.e.> 63 characters if read from config
+# openshift ci has long name for cluster i.e.> 63 characters if read from config which is not allowed by k8s/openshift
 if [[ -z ${OPENSHIFT_BUILD_NAMESPACE} ]]; then
     echo "Running locally in minishift environment"
     API_ENDPOINT=`oc config view --raw --minify -o json | jq -r '.clusters[0].cluster["server"]'`
