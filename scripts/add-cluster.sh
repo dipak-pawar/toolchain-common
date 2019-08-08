@@ -36,7 +36,6 @@ while test $# -gt 0; do
                 shift
                 ;;
             -s|--single-cluster)
-                shift
                 SINGLE_CLUSTER=true
                 shift
                 ;;
