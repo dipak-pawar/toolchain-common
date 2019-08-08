@@ -81,8 +81,17 @@ SA_SECRET=`oc get sa ${SA_NAME} -n ${OPERATOR_NS} -o json | jq -r .secrets[].nam
 SA_TOKEN=`oc get secret ${SA_SECRET} -n ${OPERATOR_NS}  -o json | jq -r '.data["token"]' | base64 -d`
 SA_CA_CRT=`oc get secret ${SA_SECRET} -n ${OPERATOR_NS} -o json | jq -r '.data["ca.crt"]'`
 
-API_ENDPOINT=`oc config view --raw --minify -o json | jq -r '.clusters[0].cluster["server"]'`
-JOINING_CLUSTER_NAME=`oc config view --raw --minify -o json | jq -r '.clusters[0].name' | sed 's/[^[:alnum:]._-]/-/g'`
+# this env variable is set in openshift-ci environment.
+# openshift ci has long name for cluster i.e.> 63 characters if read from config
+if [[ -z ${OPENSHIFT_BUILD_NAMESPACE} ]]; then
+    echo "Running locally in minishift environment"
+    API_ENDPOINT=`oc config view --raw --minify -o json | jq -r '.clusters[0].cluster["server"]'`
+    JOINING_CLUSTER_NAME=`oc config view --raw --minify -o json | jq -r '.clusters[0].name' | sed 's/[^[:alnum:]._-]/-/g'`
+else
+    echo "Running in openshift-ci environment with openshift 4.x cluster"
+    API_ENDPOINT=`oc get infrastructure cluster -o jsonpath='{.status.apiServerURL}'`
+    JOINING_CLUSTER_NAME=`oc get infrastructure cluster -o jsonpath='{.status.infrastructureName}'`
+fi
 
 # This is to work with multiple profiles of minishift. By default profile is true
 if [[ ${SINGLE_CLUSTER} != "true" ]]; then
