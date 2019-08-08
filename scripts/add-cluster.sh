@@ -100,7 +100,17 @@ if [[ ${SINGLE_CLUSTER} != "true" ]]; then
   oc login -u=system:admin
 fi
 
-CLUSTER_JOIN_TO_NAME=`oc config view --raw --minify -o json | jq -r '.clusters[0].name' | sed 's/[^[:alnum:]._-]/-/g'`
+# this env variable is set in openshift-ci environment.
+# openshift ci has long name for cluster i.e.> 63 characters if read from config which is not allowed by k8s/openshift
+if [[ -z ${OPENSHIFT_BUILD_NAMESPACE} ]]; then
+    echo "Running locally in minishift environment"
+    CLUSTER_JOIN_TO_NAME=`oc config view --raw --minify -o json | jq -r '.clusters[0].name' | sed 's/[^[:alnum:]._-]/-/g'`
+else
+    echo "Running in openshift-ci environment with openshift 4.x cluster"
+    CLUSTER_JOIN_TO_NAME=`oc get infrastructure cluster -o jsonpath='{.status.infrastructureName}'`
+fi
+
+
 oc create secret generic ${SA_NAME}-${JOINING_CLUSTER_NAME} --from-literal=token="${SA_TOKEN}" --from-literal=ca.crt="${SA_CA_CRT}" -n ${CLUSTER_JOIN_TO_OPERATOR_NS}
 
 KUBEFEDCLUSTER_CRD="apiVersion: core.kubefed.k8s.io/v1beta1
