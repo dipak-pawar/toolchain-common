@@ -1,6 +1,7 @@
 package cluster
 
 import (
+	"k8s.io/client-go/kubernetes/scheme"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -257,7 +258,7 @@ func TestDeleteCluster(t *testing.T) {
 }
 
 func newTestFedCluster(name string, clusterType Type, status v1.ConditionStatus) *FedCluster {
-	cl := fake.NewFakeClient()
+	cl := fake.NewFakeClientWithScheme(scheme.Scheme)
 	fedCluster := &FedCluster{
 		Name:              name,
 		Client:            cl,

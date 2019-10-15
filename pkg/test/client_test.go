@@ -3,6 +3,7 @@ package test
 import (
 	"context"
 	"errors"
+	"k8s.io/apimachinery/pkg/runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,7 +11,6 @@ import (
 	"k8s.io/api/core/v1"
 	errs "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -22,9 +22,12 @@ func TestNewClient(t *testing.T) {
 	assert.Nil(t, fclient.MockGet)
 	assert.Nil(t, fclient.MockList)
 	assert.Nil(t, fclient.MockUpdate)
+	assert.Nil(t, fclient.MockPatch)
 	assert.Nil(t, fclient.MockDelete)
+	assert.Nil(t, fclient.MockDeleteAllOf)
 	assert.Nil(t, fclient.MockCreate)
 	assert.Nil(t, fclient.MockStatusUpdate)
+	assert.Nil(t, fclient.MockStatusPatch)
 
 	key := types.NamespacedName{Namespace: "somenamespace", Name: "somename"}
 
@@ -49,7 +52,7 @@ func TestNewClient(t *testing.T) {
 
 		// List
 		secretList := &v1.SecretList{}
-		assert.NoError(t, fclient.List(context.TODO(), &client.ListOptions{Namespace: "somenamespace"}, secretList))
+		assert.NoError(t, fclient.List(context.TODO(), secretList, client.InNamespace("somenamespace")))
 		require.Len(t, secretList.Items, 1)
 		assert.Equal(t, *created, secretList.Items[0])
 
@@ -81,15 +84,15 @@ func TestNewClient(t *testing.T) {
 
 	t.Run("mock List", func(t *testing.T) {
 		defer func() { fclient.MockList = nil }()
-		fclient.MockList = func(ctx context.Context, opts *client.ListOptions, list runtime.Object) error {
+		fclient.MockList = func(ctx context.Context, list runtime.Object, opts ...client.ListOption) error {
 			return expectedErr
 		}
-		assert.EqualError(t, fclient.List(context.TODO(), &client.ListOptions{Namespace: "somenamespace"}, &v1.SecretList{}), expectedErr.Error())
+		assert.EqualError(t, fclient.List(context.TODO(), &v1.SecretList{}, client.InNamespace("somenamespace")), expectedErr.Error())
 	})
 
 	t.Run("mock Create", func(t *testing.T) {
 		defer func() { fclient.MockCreate = nil }()
-		fclient.MockCreate = func(ctx context.Context, obj runtime.Object) error {
+		fclient.MockCreate = func(ctx context.Context, obj runtime.Object, option ...client.CreateOption) error {
 			return expectedErr
 		}
 		assert.EqualError(t, fclient.Create(context.TODO(), &v1.Secret{}), expectedErr.Error())
@@ -97,7 +100,7 @@ func TestNewClient(t *testing.T) {
 
 	t.Run("mock Update", func(t *testing.T) {
 		defer func() { fclient.MockUpdate = nil }()
-		fclient.MockUpdate = func(ctx context.Context, obj runtime.Object) error {
+		fclient.MockUpdate = func(ctx context.Context, obj runtime.Object, option ...client.UpdateOption) error {
 			return expectedErr
 		}
 		assert.EqualError(t, fclient.Update(context.TODO(), &v1.Secret{}), expectedErr.Error())
@@ -105,7 +108,7 @@ func TestNewClient(t *testing.T) {
 
 	t.Run("mock Delete", func(t *testing.T) {
 		defer func() { fclient.MockDelete = nil }()
-		fclient.MockDelete = func(ctx context.Context, obj runtime.Object, opts ...client.DeleteOptionFunc) error {
+		fclient.MockDelete = func(ctx context.Context, obj runtime.Object, opts ...client.DeleteOption) error {
 			return expectedErr
 		}
 		assert.EqualError(t, fclient.Delete(context.TODO(), &v1.Secret{}), expectedErr.Error())
@@ -113,7 +116,7 @@ func TestNewClient(t *testing.T) {
 
 	t.Run("mock Status Update", func(t *testing.T) {
 		defer func() { fclient.MockStatusUpdate = nil }()
-		fclient.MockStatusUpdate = func(ctx context.Context, obj runtime.Object) error {
+		fclient.MockStatusUpdate = func(ctx context.Context, obj runtime.Object, opts ...client.UpdateOption) error {
 			return expectedErr
 		}
 		assert.EqualError(t, fclient.MockStatusUpdate(context.TODO(), &v1.Secret{}), expectedErr.Error())

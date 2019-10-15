@@ -2,12 +2,12 @@ package cluster_test
 
 import (
 	"github.com/codeready-toolchain/toolchain-common/pkg/cluster"
-	"github.com/operator-framework/operator-sdk/pkg/log/zap"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/h2non/gock.v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/kubefed/pkg/apis/core/common"
@@ -21,7 +21,7 @@ const (
 )
 
 func newKubeFedCluster(name, secName string, status v1beta1.KubeFedClusterStatus, labels map[string]string) (*v1beta1.KubeFedCluster, *corev1.Secret) {
-	logf.SetLogger(zap.Logger())
+	logf.ZapLogger(true)
 	gock.New("http://cluster.com").
 		Get("api").
 		Persist().
@@ -67,7 +67,7 @@ func TestAddKubeFedClusterAsMember(t *testing.T) {
 
 		t.Run("add member KubeFedCluster", func(t *testing.T) {
 			kubeFedCluster, sec := newKubeFedCluster("east", "secret", status, labels)
-			cl := fake.NewFakeClient(sec)
+			cl := fake.NewFakeClientWithScheme(scheme.Scheme, sec)
 			service := cluster.KubeFedClusterService{Log: logf.Log, Client: cl}
 			defer service.DeleteKubeFedCluster(kubeFedCluster)
 
@@ -100,7 +100,7 @@ func TestAddKubeFedClusterAsHost(t *testing.T) {
 
 		t.Run("add host KubeFedCluster", func(t *testing.T) {
 			kubeFedCluster, sec := newKubeFedCluster("east", "secret", status, labels)
-			cl := fake.NewFakeClient(sec)
+			cl := fake.NewFakeClientWithScheme(scheme.Scheme, sec)
 			service := cluster.KubeFedClusterService{Log: logf.Log, Client: cl}
 			defer service.DeleteKubeFedCluster(kubeFedCluster)
 
@@ -127,7 +127,7 @@ func TestAddKubeFedClusterFailsBecauseOfMissingSecret(t *testing.T) {
 	defer gock.Off()
 	status := newClusterStatus(common.ClusterReady, corev1.ConditionTrue)
 	kubeFedCluster, _ := newKubeFedCluster("east", "secret", status, labels("", "", nameHost))
-	cl := fake.NewFakeClient()
+	cl := fake.NewFakeClientWithScheme(scheme.Scheme)
 	service := cluster.KubeFedClusterService{Log: logf.Log, Client: cl}
 
 	// when
@@ -150,7 +150,7 @@ func TestAddKubeFedClusterFailsBecauseOfEmptySecret(t *testing.T) {
 			Name:      "secret",
 			Namespace: "test-namespace",
 		}}
-	cl := fake.NewFakeClient(secret)
+	cl := fake.NewFakeClientWithScheme(scheme.Scheme, secret)
 	service := cluster.KubeFedClusterService{Log: logf.Log, Client: cl}
 
 	// when
@@ -171,7 +171,7 @@ func TestUpdateKubeFedCluster(t *testing.T) {
 	statusFalse := newClusterStatus(common.ClusterReady, corev1.ConditionFalse)
 	kubeFedCluster2, sec2 := newKubeFedCluster("east", "secret2", statusFalse,
 		labels(cluster.Host, "", nameMember))
-	cl := fake.NewFakeClient(sec1, sec2)
+	cl := fake.NewFakeClientWithScheme(scheme.Scheme, sec1, sec2)
 	service := cluster.KubeFedClusterService{Log: logf.Log, Client: cl}
 	defer service.DeleteKubeFedCluster(kubeFedCluster2)
 	service.AddKubeFedCluster(kubeFedCluster1)
@@ -194,7 +194,7 @@ func TestDeleteKubeFedCluster(t *testing.T) {
 	status := newClusterStatus(common.ClusterReady, corev1.ConditionTrue)
 	kubeFedCluster, sec := newKubeFedCluster("east", "sec", status,
 		labels("", "", nameHost))
-	cl := fake.NewFakeClient(sec)
+	cl := fake.NewFakeClientWithScheme(scheme.Scheme, sec)
 	service := cluster.KubeFedClusterService{Log: logf.Log, Client: cl}
 	service.AddKubeFedCluster(kubeFedCluster)
 
