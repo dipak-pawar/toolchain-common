@@ -109,13 +109,13 @@ SA_TOKEN=`oc get secret ${SA_SECRET} -n ${OPERATOR_NS}  -o json | jq -r '.data["
 SA_CA_CRT=`oc get secret ${SA_SECRET} -n ${OPERATOR_NS} -o json | jq -r '.data["ca.crt"]'`
 
 # this env variable is set in openshift-ci environment.
-# openshift ci has long name for cluster i.e.> 63 characters if read from config which is not allowed by k8s/openshift
-if [[ -z ${OPENSHIFT_BUILD_NAMESPACE} ]]; then
+# openshift 4 has long name for cluster i.e.> 63 characters if read from config which is not allowed by k8s/openshift
+if [[ ${MINISHIFT} == "true" ]]; then
     echo "Running locally in minishift environment"
     API_ENDPOINT=`oc config view --raw --minify -o json | jq -r '.clusters[0].cluster["server"]'`
     JOINING_CLUSTER_NAME=`oc config view --raw --minify -o json | jq -r '.clusters[0].name' | sed 's/[^[:alnum:]._-]/-/g'`
 else
-    echo "Running in openshift-ci environment with openshift 4.x cluster"
+    echo "Running in openshift 4.x cluster"
     API_ENDPOINT=`oc get infrastructure cluster -o jsonpath='{.status.apiServerURL}'`
     JOINING_CLUSTER_NAME=`oc get infrastructure cluster -o jsonpath='{.status.infrastructureName}'`
 fi
@@ -124,11 +124,11 @@ login_to_cluster ${CLUSTER_JOIN_TO}
 
 # this env variable is set in openshift-ci environment.
 # openshift ci has long name for cluster i.e.> 63 characters if read from config which is not allowed by k8s/openshift
-if [[ -z ${OPENSHIFT_BUILD_NAMESPACE} ]]; then
+if [[ ${MINISHIFT} == "true" ]]; then
     echo "Running locally in minishift environment"
     CLUSTER_JOIN_TO_NAME=`oc config view --raw --minify -o json | jq -r '.clusters[0].name' | sed 's/[^[:alnum:]._-]/-/g'`
 else
-    echo "Running in openshift-ci environment with openshift 4.x cluster"
+    echo "Running in openshift 4.x cluster"
     CLUSTER_JOIN_TO_NAME=`oc get infrastructure cluster -o jsonpath='{.status.infrastructureName}'`
 fi
 
