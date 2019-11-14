@@ -8,18 +8,23 @@ user_help () {
     echo "-hn, --host-ns        namespace where host-operator is running"
     echo "-s,  --single-cluster running both operators on single cluster"
     echo "-m,  --minishift      in case of using minishift"
+    echo "-kc,  --kube-config   kubeconfig for managing multiple clusters"
     exit 0
 }
 
 login_to_cluster() {
     if [[ ${SINGLE_CLUSTER} != "true" ]]; then
         if [[ ${MINISHIFT} != "true" ]]; then
+          if [[ -z ${KUBECONFIG} ]]; then
             echo "Write the server url for the cluster type: $1:"
             read -p '> ' CLUSTER_URL
             echo "Provide the token to log in to the cluster ${CLUSTER_URL}:"
             read -sp '> ' CLUSTER_TOKEN
             echo ""
             oc login --token=${CLUSTER_TOKEN} --server=${CLUSTER_URL}
+          else
+            oc config use-context "$1-admin"
+          fi
         else
             echo "Switching to profile $1"
             minishift profile set $1
@@ -53,6 +58,11 @@ while test $# -gt 0; do
                 HOST_OPERATOR_NS=$1
                 shift
                 ;;
+            -kc|--kube-config)
+                shift
+                KUBECONFIG=$1
+                shift
+                ;;
             -s|--single-cluster)
                 SINGLE_CLUSTER=true
                 shift
@@ -64,7 +74,7 @@ while test $# -gt 0; do
             *)
                echo "$1 is not a recognized flag!"
                user_help
-               exit -1
+               exit 0
                ;;
       esac
 done
