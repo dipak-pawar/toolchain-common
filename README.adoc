@@ -218,6 +218,54 @@ in respective namespace with all requires resources like Service Account, (Clust
     . creates a secret in `toolchain-member-operator` namespace with the SA token taken from the `toolchain-host-operator` ns
     . creates `KubeFedCluster` in `toolchain-member-operator` namespace CR representing the added `host`
 
+==== Using a different clusters for host and member operators
+Make sure to have two different clusters ready and available. To setup Toolchain, you'll have to run `host-operator` and `registration-service` on host cluster and `member-operator` on member cluster.
+
+To do either you can pass kube-config using `-kc` flag with kubeconfig having `host-admin` and `member-admin` contexts or if you don't have kubeconfig you can provide required detail of cluster when promted for cluster URL and token.
+
+===== Sample Kubeconfig
+[source,bash]
+----
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: REDACTED
+    server: https://api.host-1573997449.devcluster.openshift.com:6443
+  name: host-1573997449
+- cluster:
+    certificate-authority-data: REDACTED
+    server: https://api.member-1573997449.devcluster.openshift.com:6443
+  name: member-1573997449
+contexts:
+- context:
+    cluster: host-1573997449
+    user: host-admin
+  name: host-admin
+- context:
+    cluster: member-1573997449
+    user: member-admin
+  name: member-admin
+current-context: host-admin
+kind: Config
+preferences: {}
+users:
+- name: host-admin
+  user:
+    client-certificate-data: REDACTED
+    client-key-data: REDACTED
+- name: member-admin
+  user:
+    client-certificate-data: REDACTED
+    client-key-data: REDACTED
+----
+
+[source,bash]
+----
+export KUBECONFIG=kubeconfig
+./scripts/add-cluster.sh -t host -s  -t member -mn ${MEMBER_OPERATOR_NS} -hn ${HOST_OPERATOR_NS} -kc ${KUBECONFIG}
+./scripts/add-cluster.sh -t member -s  -t member -mn ${MEMBER_OPERATOR_NS} -hn ${HOST_OPERATOR_NS} -kc ${KUBECONFIG}
+----
+
 ==== overwriting default namespaces for member-operator and host-operator
 
 If you are running `member-operator` and `host-operator` in different namespaces other than default (i.e. not in `toolchain-member-operator` or `toolchain-host-operator`), you can do it passing `-mn or -hs` flags
