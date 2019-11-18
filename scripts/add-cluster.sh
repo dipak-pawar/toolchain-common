@@ -69,7 +69,7 @@ while test $# -gt 0; do
             *)
                echo "$1 is not a recognized flag!"
                user_help
-               exit 1
+               exit -1
                ;;
       esac
 done
@@ -104,8 +104,8 @@ SA_SECRET=`oc get sa ${SA_NAME} -n ${OPERATOR_NS} -o json | jq -r .secrets[].nam
 SA_TOKEN=`oc get secret ${SA_SECRET} -n ${OPERATOR_NS}  -o json | jq -r '.data["token"]' | base64 --decode`
 SA_CA_CRT=`oc get secret ${SA_SECRET} -n ${OPERATOR_NS} -o json | jq -r '.data["ca.crt"]'`
 
-# openshift 4 has long name for cluster i.e.> 63 characters if read from config which is not allowed by k8s/openshift
-if [[ -n "$IS_MINISHIFT" ]]; then
+# the api endpoint and name retrieve from kubeconfig only for minishift, in case of OS4 use the oc infrastructure cluster command
+if [[ -n "${IS_MINISHIFT}" ]]; then
     echo "Running locally in minishift environment"
     API_ENDPOINT=`oc config view --raw --minify -o json | jq -r '.clusters[0].cluster["server"]'`
     JOINING_CLUSTER_NAME=`oc config view --raw --minify -o json | jq -r '.clusters[0].name' | sed 's/[^[:alnum:]._-]/-/g'`
@@ -117,8 +117,8 @@ fi
 
 login_to_cluster ${CLUSTER_JOIN_TO}
 
-# openshift ci has long name for cluster i.e.> 63 characters if read from config which is not allowed by k8s/openshift
-if [[ -n "$IS_MINISHIFT" ]]; then
+# the api endpoint and name retrieve from kubeconfig only for minishift, in case of OS4 use the oc infrastructure cluster command
+if [[ -n "${IS_MINISHIFT}" ]]; then
     echo "Running locally in minishift environment"
     CLUSTER_JOIN_TO_NAME=`oc config view --raw --minify -o json | jq -r '.clusters[0].name' | sed 's/[^[:alnum:]._-]/-/g'`
 else
