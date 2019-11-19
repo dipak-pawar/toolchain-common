@@ -13,7 +13,7 @@ user_help () {
 
 login_to_cluster() {
     if [[ ${SINGLE_CLUSTER} != "true" ]]; then
-        if [[ -z "$IS_MINISHIFT" ]]; then
+        if [[ -z "${IS_MINISHIFT}" ]]; then
           if [[ -z ${KUBECONFIG} ]]; then
             echo "Write the server url for the cluster type: $1:"
             read -p '> ' CLUSTER_URL
