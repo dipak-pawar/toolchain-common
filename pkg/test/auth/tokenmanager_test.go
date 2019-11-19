@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	uuid "github.com/satori/go.uuid"
@@ -115,6 +116,27 @@ func TestTokenManagerTokens(t *testing.T) {
 		claims, ok := decodedToken.Claims.(*jwt.StandardClaims)
 		require.True(t, ok)
 		require.Equal(t, identity0.ID.String(), claims.Subject)
+	})
+	t.Run("create token with iat extra claim", func(t *testing.T) {
+		username := uuid.NewV4().String()
+		identity0 := &Identity{
+			ID:       uuid.NewV4(),
+			Username: username,
+		}
+		// generate the token
+		iatTime := time.Now().Add(-60 * time.Second)
+		encodedToken, err := tokenManager.GenerateSignedToken(*identity0, kid0, WithIATClaim(iatTime))
+		require.NoError(t, err)
+		// unmarshall it again
+		decodedToken, err := jwt.ParseWithClaims(encodedToken, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+			return &(key0.PublicKey), nil
+		})
+		require.NoError(t, err)
+		require.True(t, decodedToken.Valid)
+		claims, ok := decodedToken.Claims.(*jwt.StandardClaims)
+		require.True(t, ok)
+		require.Equal(t, identity0.ID.String(), claims.Subject)
+		require.Equal(t, iatTime.Unix(), claims.IssuedAt)
 	})
 }
 
